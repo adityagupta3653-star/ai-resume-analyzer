@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #172033;
+        }
+        .container {
+            max-width: 650px;
+            margin: 70px auto;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            padding: 36px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px #0000000d;
+        }
+        h1 { text-align: center; margin-bottom: 12px; }
+        .subtitle { text-align: center; color: #64748b; line-height: 1.6; }
+        .upload {
+            margin: 28px 0 18px;
+            padding: 28px;
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
+            text-align: center;
+        }
+        input[type="file"] { width: 100%; margin-top: 14px; }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: 0;
+            border-radius: 9px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #1d4ed8; }
+        .error { color: #b91c1c; text-align: center; }
+        .note { text-align: center; color: #64748b; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>AI Resume Analyzer</h1>
+            <p class="subtitle">
+                Upload your resume and discover jobs that best match
+                your skills automatically.
+            </p>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+
+            <form action="{{ url_for('analyze_resume') }}"
+                  method="POST" enctype="multipart/form-data">
+
+                <div class="upload">
+                    <h3>Upload Your Resume</h3>
+                    <p>Choose a PDF or DOCX file (maximum 10 MB).</p>
+                    <input type="file" name="resume"
+                           accept=".pdf,.docx" required>
+                </div>
+
+                <button type="submit">Analyze Resume</button>
+            </form>
+
+            <p class="note">
+                No job description required. Job matches are calculated
+                from predefined job profiles.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

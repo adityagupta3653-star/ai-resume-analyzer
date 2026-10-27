@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analysis Results</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #fff9e9;
+            --card: #ffffff;
+            --yellow: #f4ce58;
+            --yellow-light: #fff0b5;
+            --text: #252719;
+            --muted: #777968;
+            --green: #37765b;
+            --red: #bd5550;
+            --border: #eee8d7;
+            --shadow: 0 7px 24px rgba(55, 48, 23, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: min(1180px, 92%);
+            margin: auto;
+        }
+
+        header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.65);
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .brand span {
+            color: #a77c0a;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 17px;
+            border-radius: 10px;
+            text-decoration: none;
+            background: var(--yellow);
+            color: #27230f;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .hero {
+            padding: 35px 0 25px;
+        }
+
+        .eyebrow {
+            color: #92701a;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: clamp(28px, 4vw, 40px);
+            line-height: 1.2;
+            margin: 8px 0;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .muted {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .filename {
+            display: inline-block;
+            margin-top: 13px;
+            background: var(--yellow-light);
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin: 22px 0;
+        }
+
+        .two-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin: 22px 0;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 22px;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            box-shadow: var(--shadow);
+            min-width: 0;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            font-size: 31px;
+            font-weight: 800;
+            margin: 7px 0;
+            line-height: 1.25;
+        }
+
+        .stat-note {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .score-card {
+            background: #fff2bf;
+            border-color: #f3dfa0;
+        }
+
+        .score-track {
+            width: 100%;
+            height: 9px;
+            background: #eee9da;
+            border-radius: 30px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .score-fill {
+            height: 100%;
+            border-radius: 30px;
+            background: var(--yellow);
+            transition: width 0.4s ease;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin-top: 18px;
+        }
+
+        .skill {
+            background: #edf6ee;
+            color: #2d6748;
+            padding: 7px 11px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .empty {
+            color: var(--muted);
+            font-size: 14px;
+            padding: 12px 0;
+        }
+
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
+        .chart-wrap.doughnut {
+            height: 260px;
+        }
+
+        .job-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .job-card {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: #fffefa;
+        }
+
+        .job-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .job-score {
+            background: var(--yellow-light);
+            border-radius: 9px;
+            padding: 5px 10px;
+            font-weight: 800;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .job-description {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 5px 0 12px;
+        }
+
+        .small-label {
+            font-size: 12px;
+            font-weight: 800;
+            margin-top: 12px;
+        }
+
+        .missing-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-top: 7px;
+        }
+
+        .missing-skill {
+            color: #a3433f;
+            background: #fff0ed;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .matched-skill {
+            color: #2d6748;
+            background: #edf6ee;
+            padding: 5px 9px;
+            border-radius: 7px;
+            font-size: 12px;
+        }
+
+        .feedback-list {
+            padding-left: 20px;
+            margin-top: 14px;
+        }
+
+        .feedback-list li {
+            padding: 6px 0;
+            color: #555747;
+            font-size: 14px;
+        }
+
+        .note {
+            margin-top: 15px;
+            padding: 12px 14px;
+            background: #fff8df;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #6e5b28;
+        }
+
+        footer {
+            text-align: center;
+            padding: 35px 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 850px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .two-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 13px;
+            }
+
+            .stat-number {
+                font-size: 25px;
+            }
+
+            .chart-wrap {
+                height: 260px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container nav">
+            <div class="brand">Resume<span>AI</span></div>
+            <a class="button" href="/">+ Analyze Another Resume</a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="hero">
+            <div class="eyebrow">Your analysis dashboard</div>
+            <h1>Resume Analysis Results</h1>
+            <p class="muted">
+                Review your detected skills, resume sections and potential job matches.
+            </p>
+            <div class="filename">
+                📄 {{ filename }}
+                &nbsp; · &nbsp;
+                {{ word_count }} words detected
+            </div>
+        </section>
+
+        <!-- SUMMARY CARDS -->
+        <section class="grid summary-grid">
+
+            <div class="card score-card">
+                <div class="stat-label">Top Job Match</div>
+                <div class="stat-number">{{ overall_score }}%</div>
+                <div class="score-track">
+
+                    <div class="score-fill" style="width: {{ overall_score|default(0)|int }}%;"></div>
+
+                </div>
+                <div class="stat-note">Highest calculated role match</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-label">Skills Detected</div>
+                <div class="stat-number">{{ resume_skills|length }}</div>
+                <div class="stat-note">Skills found in resume text</div>
+            </div>
+
+            <div class="card">
+                <div class="stat-label">Resume Length</div>
+                <div class="stat-number">{{ word_count }}</div>
+                <div class="stat-note">
+                    {% if word_count < 100 %} Short text extracted {% elif word_count < 300 %} Moderate text length {%
+                        else %} Detailed text extracted {% endif %} </div>
+                </div>
+
+                <div class="card">
+                    <div class="stat-label">Job Profiles Compared</div>
+                    <div class="stat-number">{{ job_results|length }}</div>
+                    <div class="stat-note">
+                        Predefined job profiles analyzed
+                    </div>
+                </div>
+
+        </section>
+
+        <!-- SKILLS -->
+        <section class="section grid two-grid">
+
+            <div class="card">
+                <div class="section-heading">
+                    <div>
+                        <h2>Detected Skills</h2>
+                        <p class="muted">Skills identified from your resume content.</p>
+                    </div>
+                    <strong>{{ resume_skills|length }} found</strong>
+                </div>
+
+                {% if resume_skills %}
+                <div class="skill-list">
+                    {% for skill in resume_skills %}
+                    <span class="skill">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="empty">
+                    No listed skills were detected. Try adding a clearly labelled
+                    Skills section using recognizable skill names.
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h2>Resume Section Analysis</h2>
+                <p class="muted">
+                    Rule-based indicators from extracted resume text.
+                </p>
+
+
+                <div style="margin-top:20px;">
+                    {% for item in [
+                    ("Content Quality", content_score),
+                    ("Education", education_score),
+                    ("Projects", projects_score),
+                    ("Experience", experience_score)
+                    ] %}
+                    <div style="margin-bottom:20px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                            <strong>{{ item[0] }}</strong>
+                            <strong>{{ item[1] }}%</strong>
+                        </div>
+                        <div style="height:18px; background:#eee8d7; border-radius:20px; overflow:hidden;">
+                            <div style="height:18px; width:{{ [100, [0, item[1]|int]|max]|min }}%; background:#e8bd43;">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- JOB MATCH AND SKILL COVERAGE -->
+        <section class="section grid two-grid">
+
+            <div class="card">
+                <h2>Job Match Comparison</h2>
+                <p class="muted">Resume match percentage for each job profile.</p>
+
+                {% for job in job_results %}
+                <div style="margin-top:20px;">
+                    <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:7px;">
+                        <strong>{{ job.title }}</strong>
+                        <strong>{{ job.score }}%</strong>
+                    </div>
+                    <div style="height:16px; background:#eee8d7; border-radius:20px; overflow:hidden;">
+                        <div style="height:100%; width:{{ [100, [0, job.score|int]|max]|min }}%; background:#e8bd43;">
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <p>No job matches available.</p>
+                {% endfor %}
+            </div>
+
+            <div class="card">
+                <h2>Top Role: Skill Coverage</h2>
+                <p class="muted">Required skills detected in your resume.</p>
+
+                {% if job_results %}
+                {% set top_job = job_results[0] %}
+                {% set total = top_job.required_skills|length %}
+                {% set matched = top_job.matched_skills|length %}
+                {% set missing = top_job.missing_skills|length %}
+                {% set coverage = ((matched / total) * 100)|round|int if total else 0 %}
+
+                <div style="text-align:center; margin:25px 0;">
+                    <strong style="font-size:38px;">{{ coverage }}%</strong>
+                    <p>{{ top_job.title }} skill coverage</p>
+                </div>
+
+                <div style="display:flex; height:26px; background:#f3d6d2; border-radius:8px; overflow:hidden;">
+                    <div style="width:{{ coverage }}%; background:#79a88a;"></div>
+                </div>
+
+                <p style="margin-top:15px;">🟢 Matched skills: {{ matched }}</p>
+                <p>🔴 Missing skills: {{ missing }}</p>
+                <p class="muted">{{ matched }} of {{ total }} required skills detected.</p>
+                {% else %}
+                <p>No skill coverage data available.</p>
+                {% endif %}
+            </div>
+
+        </section>
+
+        <!-- JOB RECOMMENDATIONS -->
+        <section class="section card">
+            <div class="section-heading">
+                <div>
+                    <h2>Recommended Job Profiles</h2>
+                    <p class="muted">
+                        Ranked by detected skill overlap and text similarity.
+                    </p>
+                </div>
+            </div>
+
+            {% if job_results %}
+            <div class="job-list">
+                {% for job in job_results %}
+                <article class="job-card">
+
+                    <div class="job-top">
+                        <div>
+                            <h3>
+                                {% if loop.first %}⭐ {% endif %}
+                                {{ job.title }}
+                            </h3>
+                            <p class="job-description">
+                                {{ job.description }}
+                            </p>
+                        </div>
+                        <span class="job-score">{{ job.score }}%</span>
+                    </div>
+
+                    <div class="score-track">
+                        <div class="score-fill" style="width: {{ job.score }}%;"></div>
+                    </div>
+
+                    <div class="small-label">Matched skills</div>
+                    <div class="missing-list">
+                        {% if job.matched_skills %}
+                        {% for skill in job.matched_skills %}
+                        <span class="matched-skill">{{ skill }}</span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="muted">No required skills detected.</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="small-label">
+                        Skills not detected in your resume
+                    </div>
+                    <div class="missing-list">
+                        {% if job.missing_skills %}
+                        {% for skill in job.missing_skills %}
+                        <span class="missing-skill">{{ skill }}</span>
+                        {% endfor %}
+                        {% else %}
+                        <span class="matched-skill">
+                            All listed required skills detected
+                        </span>
+                        {% endif %}
+                    </div>
+
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty">No job profiles are available to compare.</p>
+            {% endif %}
+
+            <p class="note">
+                A missing skill means the analyzer did not find that keyword in
+                the extracted text. It does not prove that you lack the skill.
+            </p>
+        </section>
+
+        <!-- FEEDBACK -->
+        <section class="section card">
+            <h2>Resume Improvement Suggestions</h2>
+            <p class="muted">
+                Suggestions generated from the current analysis rules.
+            </p>
+
+            {% if suggestions %}
+            <ul class="feedback-list">
+                {% for suggestion in suggestions %}
+                <li>{{ suggestion }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="empty">No suggestions generated.</p>
+            {% endif %}
+
+            <p class="note">
+                The section scores are heuristic indicators based on keywords and
+                text length. They are not a definitive assessment of resume quality.
+            </p>
+        </section>
+
+    </main>
+
+    <footer>
+        AI Resume Analyzer · Automated text analysis for guidance only
+    </footer>
+
+    <!-- CHART DATA FROM FLASK/JINJA -->
+    <script>
+        const categoryLabels = [
+            "Content",
+            "Education",
+            "Projects",
+            "Experience"
+        ];
+
+        const categoryValues = [
+            {{ content_score|default (0) | int }},
+        { { education_score |default (0) | int } },
+        { { projects_score |default (0) | int } },
+        { { experience_score |default (0) | int } }
+    ];
+
+        const jobLabels = [
+            {% for job in job_results %}
+        { { job.title | tojson } } {% if not loop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+        const jobValues = [
+            {% for job in job_results %}
+        { { job.score | int } } {% if not loop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+        const matchedCount = {{ job_results[0].matched_skills| length if job_results else 0 }};
+        const missingCount = {{ job_results[0].missing_skills| length if job_results else 0 }};
+
+        Chart.defaults.font.family = "Arial, Helvetica, sans-serif";
+        Chart.defaults.color = "#777968";
+
+        new Chart(document.getElementById("categoryChart"), {
+            type: "bar",
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: "Section indicator",
+                    data: categoryValues,
+                    backgroundColor: ["#f4ce58", "#8cb79a", "#edaa83", "#9ba9dc"],
+                    borderRadius: 7,
+                    maxBarThickness: 48
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: "y",
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: value => value + "%" },
+                        grid: { color: "#f0eddf" }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context => context.raw + "%"
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById("jobChart"), {
+            type: "bar",
+            data: {
+                labels: jobLabels,
+                datasets: [{
+                    label: "Calculated match",
+                    data: jobValues,
+                    backgroundColor: "#f4ce58",
+                    borderRadius: 7,
+                    maxBarThickness: 42
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: "y",
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: value => value + "%" },
+                        grid: { color: "#f0eddf" }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: context => context.raw + "% match"
+                        }
+                    }
+                }
+            }
+        });
+
+        new Chart(document.getElementById("skillChart"), {
+            type: "doughnut",
+            data: {
+                labels: ["Matched skills", "Not detected"],
+                datasets: [{
+                    data: [matchedCount, missingCount],
+                    backgroundColor: ["#8cb79a", "#f0b1a7"],
+                    borderColor: "#ffffff",
+                    borderWidth: 4,
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 18
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
